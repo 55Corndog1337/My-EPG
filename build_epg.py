@@ -146,6 +146,12 @@ def main():
     with gzip.open(site / 'epg.xml.gz', 'wb', compresslevel=6) as out:
         ET.ElementTree(root).write(out, encoding='utf-8', xml_declaration=True)
     (site / '.nojekyll').touch()
+    (site / 'index.html').write_text(
+    '<h1>My EPG</h1>'
+    '<p><a href="epg.xml.gz">Download EPG</a></p>',
+    encoding='utf-8'
+)
+print('Site files:', [p.name for p in site.iterdir()])
     print('Published:', len(channels), 'channels,', len(programs), 'programmes')
     print('PRIVATE playlist:', len(items), 'entries')
     print('Note: download the private playlist from the Actions artifact, never Pages')
