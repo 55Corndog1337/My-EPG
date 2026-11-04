@@ -1,0 +1,39 @@
+name: Update EPG
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */12 * * *'
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build guide and private playlist
+        env:
+          PLAYLIST_URL: ${{ secrets.PLAYLIST_URL }}
+        run: python build_epg.py
+      - name: Save private playlist as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: matching-private-playlist
+          path: private/playlist.m3u
+          retention-days: 7
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
